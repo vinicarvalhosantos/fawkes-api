@@ -1,0 +1,47 @@
+version: '3'
+services:
+  mysql_dev:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=nagini-api
+      - MYSQL_DATABASE=nagini-api
+      - MYSQL_USER=nagini-api
+      - MYSQL_PASSWORD=nagini-api
+    expose:
+      - '3306'
+    ports:
+      - '3306:3306'
+  postgresql:
+    image: docker.io/bitnami/postgresql:13
+    volumes:
+      - 'postgresql_data:/bitnami/postgresql'
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_USERNAME=bn_sonarqube
+      - POSTGRESQL_DATABASE=bitnami_sonarqube
+    expose:
+      - '5632'
+    ports:
+      - '5632:5432'
+  sonarqube:
+    image: sonarqube
+    ports:
+      - '9000:9000'
+      - '9092:9092'
+    volumes:
+      - 'sonarqube_data:/bitnami/sonarqube'
+    depends_on:
+      - postgresql
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - SONARQUBE_DATABASE_HOST=localhost
+      - SONARQUBE_DATABASE_PORT_NUMBER=5632
+      - SONARQUBE_DATABASE_USER=bn_sonarqube
+      - SONARQUBE_DATABASE_NAME=bitnami_sonarqube
+volumes:
+  postgresql_data:
+    driver: local
+  sonarqube_data:
+    driver: local
