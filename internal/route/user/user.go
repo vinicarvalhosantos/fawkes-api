@@ -2,10 +2,10 @@ package userRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	userHandler "gitlab.com/vinicius.csantos/go-template-api/internal/handler/user"
-	authRoutes "gitlab.com/vinicius.csantos/go-template-api/internal/route/user/auth"
-	constants "gitlab.com/vinicius.csantos/go-template-api/internal/util/constant"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/util/jwt"
+	userHandler "gitlab.com/vinicius.csantos/fawkes-api/internal/handler/user"
+	authRoutes "gitlab.com/vinicius.csantos/fawkes-api/internal/route/user/auth"
+	constants "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/jwt"
 )
 
 func SetupUserRoutes(router fiber.Router) {

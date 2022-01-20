@@ -3,13 +3,13 @@ package userHandler
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"gitlab.com/vinicius.csantos/go-template-api/database"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/model"
-	constants "gitlab.com/vinicius.csantos/go-template-api/internal/util/constant"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/util/cpfCNPJ"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/util/encrypt"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/util/jwt"
-	stringUtil "gitlab.com/vinicius.csantos/go-template-api/internal/util/string"
+	"gitlab.com/vinicius.csantos/fawkes-api/database"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/model"
+	constants "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/cpfCNPJ"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/encrypt"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/jwt"
+	stringUtil "gitlab.com/vinicius.csantos/fawkes-api/internal/util/string"
 	"net/mail"
 )
 

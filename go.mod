@@ -1,4 +1,4 @@
-module gitlab.com/vinicius.csantos/go-template-api
+module gitlab.com/vinicius.csantos/fawkes-api
 
 go 1.17
 

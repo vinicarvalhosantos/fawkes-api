@@ -2,9 +2,9 @@ package addressRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/handler/address"
-	constantUtils "gitlab.com/vinicius.csantos/go-template-api/internal/util/constant"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/util/jwt"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/handler/address"
+	constantUtils "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/jwt"
 )
 
 func SetupAddressRoutes(router fiber.Router) {

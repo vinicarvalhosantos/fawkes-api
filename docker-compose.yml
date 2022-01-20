@@ -3,10 +3,10 @@ services:
   mysql_dev:
     image: mysql:5.7
     environment:
-      - MYSQL_ROOT_PASSWORD=nagini-api
-      - MYSQL_DATABASE=nagini-api
-      - MYSQL_USER=nagini-api
-      - MYSQL_PASSWORD=nagini-api
+      - MYSQL_ROOT_PASSWORD=fawkes-api
+      - MYSQL_DATABASE=fawkes-api
+      - MYSQL_USER=fawkes-api
+      - MYSQL_PASSWORD=fawkes-api
     expose:
       - '3306'
     ports:

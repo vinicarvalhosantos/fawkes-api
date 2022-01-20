@@ -2,7 +2,7 @@ package authRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	userHandler "gitlab.com/vinicius.csantos/go-template-api/internal/handler/user"
+	userHandler "gitlab.com/vinicius.csantos/fawkes-api/internal/handler/user"
 )
 
 func SetupRegisterRoute(router fiber.Router) {

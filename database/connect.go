@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"gitlab.com/vinicius.csantos/go-template-api/config"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/model"
+	"gitlab.com/vinicius.csantos/fawkes-api/config"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"

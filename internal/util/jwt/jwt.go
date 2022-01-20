@@ -5,7 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	jwtMiddleware "github.com/gofiber/jwt/v3"
-	"gitlab.com/vinicius.csantos/go-template-api/config"
+	"gitlab.com/vinicius.csantos/fawkes-api/config"
 	"time"
 )
 

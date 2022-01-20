@@ -3,10 +3,10 @@ package address
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"gitlab.com/vinicius.csantos/go-template-api/database"
-	"gitlab.com/vinicius.csantos/go-template-api/internal/model"
-	constants "gitlab.com/vinicius.csantos/go-template-api/internal/util/constant"
-	stringUtil "gitlab.com/vinicius.csantos/go-template-api/internal/util/string"
+	"gitlab.com/vinicius.csantos/fawkes-api/database"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/model"
+	constants "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
+	stringUtil "gitlab.com/vinicius.csantos/fawkes-api/internal/util/string"
 )
 
 func GetAddresses(c *fiber.Ctx) error {
