@@ -2,7 +2,6 @@ package address
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"gitlab.com/vinicius.csantos/fawkes-api/database"
 	"gitlab.com/vinicius.csantos/fawkes-api/internal/model"
 	constants "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
@@ -87,7 +86,7 @@ func RegisterAddress(c *fiber.Ctx) error {
 
 	err = db.Find(&user, constants.IdCondition, newAddress.UserID).Error
 
-	if err != nil || user.ID == uuid.Nil {
+	if err != nil || user.ID == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": constants.StatusNotFound, "message": model.MessageUser(constants.GenericNotFoundMessage), "data": nil})
 	}
 
@@ -136,7 +135,7 @@ func UpdateUserMainAddress(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
 	}
 
-	if user.ID == uuid.Nil {
+	if user.ID == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": constants.StatusNotFound, "message": model.MessageUser(constants.GenericNotFoundMessage), "data": nil})
 	}
 

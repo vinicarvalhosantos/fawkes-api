@@ -2,21 +2,16 @@ package authRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	userHandler "gitlab.com/vinicius.csantos/fawkes-api/internal/handler/user"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/handler/user/auth"
+	"gitlab.com/vinicius.csantos/fawkes-api/internal/util/jwt"
 )
 
-func SetupRegisterRoute(router fiber.Router) {
-	register := router.Group("/register")
+func SetupAuthRoutes(router fiber.Router) {
 
-	//Register a new user
-	register.Post("/", userHandler.RegisterUser)
+	authRoute := router.Group("/Login")
 
-}
+	authRoute.Post("/", jwt.Protected(), auth.LoginOrRegisterUser)
 
-func SetupLoginRoute(router fiber.Router) {
-	login := router.Group("/login")
-
-	//Sign in a user
-	login.Post("/", userHandler.Login)
+	authRoute.Get("/state", jwt.Protected(), auth.CreateState)
 
 }

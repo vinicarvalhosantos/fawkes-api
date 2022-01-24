@@ -13,7 +13,6 @@ func SetupRoutes(app *fiber.App) {
 
 	//Performance Monitor Route
 	app.Get("/dashboard", monitor.New())
-
 	v1.SetupV1Routes(api)
 
 }

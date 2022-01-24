@@ -13,9 +13,11 @@ const (
 	GenericDeleteErrorMessage         = "It was not possible to update this %_%"
 	GenericInternalServerErrorMessage = "It was not possible to perform this action"
 	GenericInvalidFieldMessage        = "%_% cannot be null"
+	SetCacheFailed                    = "It was not possible to save datas in cache."
 	CpfCnpjInvalidMessage             = "This CPF or CNPJ is not valid!"
 	RoleInvalidMessage                = "This Role is not valid!"
 	EmailInvalidMessage               = "This Email is not valid!"
+	GenericUnauthorizedMessage        = "The token informed is not valid!"
 
 	//STATUS
 
@@ -24,6 +26,7 @@ const (
 	StatusInternalServerError = "internal_server_error"
 	StatusNotFound            = "not_found"
 	StatusBadRequest          = "bad_request"
+	StatusUnauthorized        = "unauthorized"
 
 	//ROUTES
 
@@ -33,6 +36,6 @@ const (
 
 	//CONDITIONS
 
-	IdCondition = "id = ?"
+	IdCondition     = "id = ?"
 	UserIdCondition = "user_id = ?"
 )

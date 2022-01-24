@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	stringUtil "gitlab.com/vinicius.csantos/fawkes-api/internal/util/string"
 	"time"
 )
@@ -15,7 +14,7 @@ type Address struct {
 	City         string
 	State        string
 	Country      string
-	UserID       uuid.UUID
+	UserID       int64
 	MainAddress  bool
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
@@ -48,7 +47,7 @@ func CheckIfAddressEntityIsValid(address *Address) (bool, string) {
 	if address.Country == "" {
 		return false, "Country"
 	}
-	if address.UserID == uuid.Nil {
+	if address.UserID == 0 {
 		return false, "UserID"
 	}
 
