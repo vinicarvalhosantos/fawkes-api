@@ -55,9 +55,9 @@ Lista de variáveis de ambiente necessárias para a execução da aplicação (P
 
 | Variável               | Descrição                             |   Tipo   | Obrigatório |  Valor Padrão   |
 | ---------------------- | ------------------------------------- | :------: | :---------: | :-------------: |
-| DB_NAME          | Nome do banco de dados                |  Texto   |     Não     |    nagini-api    |
-| DB_USERNAME      | Usuário para conexão de dados         |  Texto   |     Não     |    nagini-api    |
-| DB_PASSWORD      | Senha do usuário para acesso ao banco |  Texto   |     Não     |    nagini-api    |
+| DB_NAME          | Nome do banco de dados                |  Texto   |     Não     |    fawkes-api    |
+| DB_USERNAME      | Usuário para conexão de dados         |  Texto   |     Não     |    fawkes-api    |
+| DB_PASSWORD      | Senha do usuário para acesso ao banco |  Texto   |     Não     |    fawkes-api    |
 | DB_HOST          | Host para acesso ao Banco             |  Texto   |     Não     |    localhost    |
 | DB_PORT          | Porta para acesso ao Banco            | Numérico |     Não     |      5432       |
 | APPLICATION_PORT          | Porta para acesso a Aplicação            | Numérico |     Não     |      5000       |
