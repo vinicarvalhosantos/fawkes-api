@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"gitlab.com/vinicius.csantos/fawkes-api/config"
-	"gitlab.com/vinicius.csantos/fawkes-api/database"
-	"gitlab.com/vinicius.csantos/fawkes-api/router"
+	"github.com/vinicarvalhosantos/fawkes-api/config"
+	"github.com/vinicarvalhosantos/fawkes-api/database"
+	"github.com/vinicarvalhosantos/fawkes-api/router"
 	"log"
 )
 

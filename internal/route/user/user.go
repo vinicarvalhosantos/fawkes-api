@@ -2,7 +2,7 @@ package userRoutes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	authRoutes "gitlab.com/vinicius.csantos/fawkes-api/internal/route/user/auth"
+	authRoutes "github.com/vinicarvalhosantos/fawkes-api/internal/route/user/auth"
 )
 
 func SetupUserRoutes(router fiber.Router) {

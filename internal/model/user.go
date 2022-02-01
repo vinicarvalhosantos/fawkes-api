@@ -1,7 +1,7 @@
 package model
 
 import (
-	stringUtil "gitlab.com/vinicius.csantos/fawkes-api/internal/util/string"
+	stringUtil "github.com/vinicarvalhosantos/fawkes-api/internal/util/string"
 	"time"
 )
 

@@ -1,4 +1,4 @@
-module gitlab.com/vinicius.csantos/fawkes-api
+module github.com/vinicarvalhosantos/fawkes-api
 
 go 1.17
 

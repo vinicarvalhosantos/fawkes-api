@@ -2,8 +2,8 @@ package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
-	addressRoutes "gitlab.com/vinicius.csantos/fawkes-api/internal/route/address"
-	userRoutes "gitlab.com/vinicius.csantos/fawkes-api/internal/route/user"
+	addressRoutes "github.com/vinicarvalhosantos/fawkes-api/internal/route/address"
+	userRoutes "github.com/vinicarvalhosantos/fawkes-api/internal/route/user"
 )
 
 func SetupV1Routes(router fiber.Router) {

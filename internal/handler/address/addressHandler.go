@@ -2,10 +2,10 @@ package address
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"gitlab.com/vinicius.csantos/fawkes-api/database"
-	"gitlab.com/vinicius.csantos/fawkes-api/internal/model"
-	constants "gitlab.com/vinicius.csantos/fawkes-api/internal/util/constant"
-	stringUtil "gitlab.com/vinicius.csantos/fawkes-api/internal/util/string"
+	"github.com/vinicarvalhosantos/fawkes-api/database"
+	"github.com/vinicarvalhosantos/fawkes-api/internal/model"
+	constants "github.com/vinicarvalhosantos/fawkes-api/internal/util/constant"
+	stringUtil "github.com/vinicarvalhosantos/fawkes-api/internal/util/string"
 )
 
 func GetAddresses(c *fiber.Ctx) error {
