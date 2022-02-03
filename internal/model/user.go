@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-type UserRole string
+type Role string
 
 const (
-	RoleBroadcaster UserRole = "broadcaster" // Permissão Full
-	RoleAdmin       UserRole = "admin"       // Permissão Full Exceto Editar os cargos
-	RoleModerator   UserRole = "moderator"   //Permissão Básica Somente Leitura
-	RoleUser        UserRole = "user"        //Permissão de Viewer
+	BroadcasterRole Role = "broadcaster" // Permissão Full
+	AdminRole       Role = "admin"       // Permissão Full Exceto Editar os cargos
+	ModeratorRole   Role = "moderator"   //Permissão Básica Somente Leitura
+	UserRole        Role = "user"        //Permissão de Viewer
 )
 
 type User struct {
@@ -23,12 +23,17 @@ type User struct {
 	CpfCnpj                  string    `gorm:"index;"`
 	Address                  []Address `gorm:"foreignKey:UserID"`
 	Birthdate                string
-	Balance                  int64 `gorm:"default:0"`
+	Balance                  int32 `gorm:"default:0"`
 	InRedemptionCooldown     bool
 	RedemptionCooldownEndsAt time.Time
-	Role                     UserRole `gorm:"not null;"`
+	Role                     Role `gorm:"not null;"`
 	CreatedAt                time.Time
 	UpdatedAt                time.Time
+}
+
+type UpdateUser struct {
+	CpfCnpj   string
+	Birthdate string
 }
 
 type TwitchUser struct {

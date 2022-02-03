@@ -54,37 +54,33 @@ func CheckIfAddressEntityIsValid(address *Address) (bool, string) {
 	return true, ""
 }
 
-func PrepareAddressToUpdate(address *Address, updateAddress *UpdateAddress) *Address {
+func PrepareAddressToUpdate(address **Address, updateAddress *UpdateAddress) {
 
 	if updateAddress.Name != "" {
-		address.Name = updateAddress.Name
+		(*address).Name = updateAddress.Name
 	}
 
 	if updateAddress.Cep != "" {
-		address.Cep = updateAddress.Cep
+		(*address).Cep = updateAddress.Cep
 	}
 
 	if updateAddress.AddressLine1 != "" {
-		address.AddressLine1 = updateAddress.AddressLine1
-	}
-
-	if updateAddress.AddressLine2 != "" {
-		address.AddressLine2 = updateAddress.AddressLine2
+		(*address).AddressLine1 = updateAddress.AddressLine1
 	}
 
 	if updateAddress.City != "" {
-		address.City = updateAddress.City
+		(*address).City = updateAddress.City
 	}
 
 	if updateAddress.State != "" {
-		address.State = updateAddress.State
+		(*address).State = updateAddress.State
 	}
 
 	if updateAddress.Country != "" {
-		address.Country = updateAddress.Country
+		(*address).Country = updateAddress.Country
 	}
 
-	return address
+	(*address).AddressLine2 = updateAddress.AddressLine2
 }
 
 func MessageAddress(genericMessage string) string {
