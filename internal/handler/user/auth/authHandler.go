@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/vinicarvalhosantos/fawkes-api/config"
 	"github.com/vinicarvalhosantos/fawkes-api/database"
+	userHandler "github.com/vinicarvalhosantos/fawkes-api/internal/handler/user"
 	"github.com/vinicarvalhosantos/fawkes-api/internal/model"
 	constants "github.com/vinicarvalhosantos/fawkes-api/internal/util/constant"
 	"github.com/vinicarvalhosantos/fawkes-api/internal/util/jwt"
@@ -35,10 +36,10 @@ var (
 	twitchHelixUrl = config.GetSecretKey("TWITCH_HELIX_URL")
 )
 
-var AuthCache ttlcache.SimpleCache = ttlcache.NewCache()
+var Cache ttlcache.SimpleCache = ttlcache.NewCache()
 
 func CreateState(c *fiber.Ctx) error {
-	authCache := AuthCache
+	authCache := Cache
 
 	var tokenBytes [255]byte
 
@@ -105,13 +106,19 @@ func LoginOrRegisterUser(c *fiber.Ctx) error {
 		user.Email = twitchUser.Email
 		user.ProfileImageUrl = twitchUser.ProfileImageUrl
 		user.InRedemptionCooldown = false
-		user.Role = model.RoleUser
+		user.Role = model.UserRole
 		user.RedemptionCooldownEndsAt = time.Now()
 
 		err = db.Create(&user).Error
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
 		}
+	}
+
+	err = userHandler.FetchUserAddresses(&user)
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
 	}
 
 	validToken, err := jwt.GenerateToken(user.Login, user.DisplayName, user.Email, strconv.FormatInt(user.ID, 10))
@@ -122,7 +129,7 @@ func LoginOrRegisterUser(c *fiber.Ctx) error {
 }
 
 func GetBroadcasterToken() (string, error) {
-	authCache := AuthCache
+	authCache := Cache
 
 	broadcasterToken, err := authCache.Get(broadcasterTokenKey)
 
@@ -192,13 +199,6 @@ func getTwitchUserFromToken(target interface{}, userToken string) error {
 	if err != nil {
 		return err
 	}
-	/*body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	//Convert the body to type string
-	sb := string(body)
-	log.Printf(sb)*/
 
 	return nil
 }

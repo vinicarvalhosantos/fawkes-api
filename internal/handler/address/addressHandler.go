@@ -179,7 +179,7 @@ func UpdateAddress(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": constants.StatusNotFound, "message": model.MessageAddress(constants.GenericNotFoundMessage), "data": nil})
 	}
 
-	address = model.PrepareAddressToUpdate(address, updateAddress)
+	model.PrepareAddressToUpdate(&address, updateAddress)
 
 	err = db.Save(address).Error
 
