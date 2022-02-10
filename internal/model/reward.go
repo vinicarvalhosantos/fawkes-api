@@ -1,39 +1,43 @@
 package model
 
 import (
+	"github.com/google/uuid"
 	stringUtil "github.com/vinicarvalhosantos/fawkes-api/internal/util/string"
 	"time"
 )
 
 type Reward struct {
-	ID              uint
+	ID              uuid.UUID
 	Title           string
 	Prompt          string
 	Cost            int16
 	BackgroundColor string
 	IsEnabled       bool
 	ShouldSkipQueue bool
-	MaxUsePerStream uint
-	MaxUserPerUser  uint
+	MaxUsePerStream int16
+	MaxUserPerUser  int16
 	GlobalCooldown  int32
 	IsPaused        bool
 	CreatedBy       int64
 	CreatedAt       time.Time
-	UpdateAt        time.Time
+	UpdatedAt       time.Time
 }
 
 type UpdateReward struct {
 	Title           string
 	Prompt          string
-	Cost            int16
+	Cost            uint
 	BackgroundColor string
 	ShouldSkipQueue bool
-	MaxUsePerStream uint
-	MaxUsePerUser   uint
+	MaxUsePerStream int16
+	MaxUsePerUser   int16
 	GlobalCooldowm  int32
 }
 
 func CheckIfRewardEntityIsValid(reward *Reward) (bool, string) {
+	if reward.ID == uuid.Nil {
+		return false, "ID"
+	}
 	if reward.Title == "" {
 		return false, "Title"
 	}
@@ -46,13 +50,13 @@ func CheckIfRewardEntityIsValid(reward *Reward) (bool, string) {
 	if reward.BackgroundColor == "" {
 		return false, "BackgroundColor"
 	}
-	if reward.MaxUsePerStream <= 0 {
+	if reward.MaxUsePerStream == 0 {
 		return false, "MaxUsePerStream"
 	}
-	if reward.MaxUserPerUser <= 0 {
+	if reward.MaxUserPerUser == 0 {
 		return false, "MaxUserPerUser"
 	}
-	if reward.GlobalCooldown <= 0 {
+	if reward.GlobalCooldown == 0 {
 		return false, "GlobalCooldown"
 	}
 	if reward.CreatedBy <= 0 {

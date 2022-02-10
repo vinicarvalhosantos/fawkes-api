@@ -53,6 +53,16 @@ type UserFind struct {
 	State       string
 }
 
+func PrepareUserToUpdate(user **User, updateUser *UpdateUser) {
+	if updateUser.CpfCnpj != "" {
+		(*user).CpfCnpj = updateUser.CpfCnpj
+	}
+
+	if updateUser.Birthdate != "" {
+		(*user).Birthdate = updateUser.Birthdate
+	}
+}
+
 func MessageUser(genericMessage string) string {
 	return stringUtil.FormatGenericMessagesString(genericMessage, "User")
 }
