@@ -12,8 +12,9 @@ func SetupUserRoutes(router fiber.Router) {
 
 	userRoute := router.Group("/user")
 
+	//Get All Users
 	userRoute.Get("/", jwt.Protected(), user.GetAllUsers)
-
+	//Get User By ID
 	userRoute.Get(constantUtils.PathUserIdParam, jwt.Protected(), user.GetUserById)
 
 	authRoutes.SetupAuthRoutes(userRoute)
