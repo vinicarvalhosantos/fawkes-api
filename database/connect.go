@@ -61,5 +61,10 @@ func migrateModels() error {
 		return err
 	}
 
+	err = DB.AutoMigrate(&model.Reward{})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
