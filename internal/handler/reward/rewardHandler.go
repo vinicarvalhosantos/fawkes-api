@@ -141,7 +141,7 @@ func UpdateReward(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status":  constants.StatusSuccess,
-		"message": model.MessageAddress(constants.GenericFoundSuccessMessage),
+		"message": model.MessageReward(constants.GenericFoundSuccessMessage),
 		"data":    reward})
 }
 
