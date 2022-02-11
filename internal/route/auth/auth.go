@@ -8,11 +8,11 @@ import (
 
 func SetupAuthRoutes(router fiber.Router) {
 
-	authRoute := router.Group("/Login")
+	authRoute := router.Group("/login")
 
 	//Login Or Register User
-	authRoute.Post("/", jwt.Protected(), auth.LoginOrRegisterUser)
-	//Create User Login/Register State
-	authRoute.Get("/state", jwt.Protected(), auth.CreateState)
+	authRoute.Get("/", jwt.Protected(), auth.LoginOrRegisterTwitchUser)
+	//Twitch Callback
+	authRoute.Get("/user-callback", auth.UserLoginCallback)
 
 }

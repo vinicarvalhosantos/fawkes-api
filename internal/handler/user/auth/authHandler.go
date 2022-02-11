@@ -7,15 +7,17 @@ import (
 	"fmt"
 	"github.com/ReneKroon/ttlcache/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/fiber/v2/utils"
 	"github.com/vinicarvalhosantos/fawkes-api/config"
 	"github.com/vinicarvalhosantos/fawkes-api/database"
-	userHandler "github.com/vinicarvalhosantos/fawkes-api/internal/handler/user"
 	"github.com/vinicarvalhosantos/fawkes-api/internal/model"
 	constants "github.com/vinicarvalhosantos/fawkes-api/internal/util/constant"
-	"github.com/vinicarvalhosantos/fawkes-api/internal/util/jwt"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/twitch"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -26,76 +28,119 @@ import (
 const (
 	stateCallbackKey    = "oauth-state-callback"
 	broadcasterTokenKey = "broadcaster-token"
+	oauthSessionName    = "cookie:oauth-session"
+	oauthTokenKey       = "oauth-token"
+	sessionSaveFailed   = "Could not save the request session. Please contact an administrator!"
+	stateGenerateFailed = "it was not possible to create a new state. Please contact an administrator!"
+	invalidSession      = "This is a invalid session, generating a new one!"
+	invalidState        = "This state is invalid!"
 )
 
 var (
-	clientID       = config.GetSecretKey("TWITCH_CLIENT_ID")
-	clientSecret   = config.GetSecretKey("TWITCH_CLIENT_SECRET")
-	oauth2Config   *clientcredentials.Config
-	scopes         = strings.Split(config.GetSecretKey("TWITCH_SCOPES"), ";")
-	twitchHelixUrl = config.GetSecretKey("TWITCH_HELIX_URL")
+	clientID                = config.GetSecretKey("TWITCH_CLIENT_ID")
+	clientSecret            = config.GetSecretKey("TWITCH_CLIENT_SECRET")
+	oauth2ClientCredentials *clientcredentials.Config
+	redirectURL             = config.GetSecretKey("TWITCH_REDIRECT_URL")
+	oauth2Config            *oauth2.Config
+	scopes                  = strings.Split(config.GetSecretKey("TWITCH_SCOPES"), ";")
+	twitchHelixUrl          = config.GetSecretKey("TWITCH_HELIX_URL")
+	baseSuccessUrl          = fmt.Sprintf("%s/success", config.Config("REDIRECT_URL", ""))
+	baseErrorUrl            = fmt.Sprintf("%s/error", config.Config("REDIRECT_URL", ""))
+	cookieStore             = session.New(session.Config{
+		CookieSecure: true,
+		Expiration:   24 * time.Hour,
+		KeyLookup:    oauthSessionName,
+		KeyGenerator: utils.UUID,
+	})
 )
 
 var Cache ttlcache.SimpleCache = ttlcache.NewCache()
 
-func CreateState(c *fiber.Ctx) error {
-	authCache := Cache
-
-	var tokenBytes [255]byte
-
-	if _, err := rand.Read(tokenBytes[:]); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
-	}
-
-	state := hex.EncodeToString(tokenBytes[:])
-
-	err := authCache.SetTTL(8 * time.Hour)
+func LoginOrRegisterTwitchUser(c *fiber.Ctx) error {
+	sessionStorage, err := cookieStore.Get(c)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.SetCacheFailed, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": invalidSession, "data": err.Error()})
 	}
 
-	err = authCache.Set(stateCallbackKey, state)
+	state, err := generateState()
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.SetCacheFailed, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": stateGenerateFailed, "data": err.Error()})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": constants.StatusSuccess, "message": "Success", "data": state})
+	sessionStorage.Set(stateCallbackKey, state)
+
+	if err = sessionStorage.Save(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": sessionSaveFailed, "data": err.Error()})
+	}
+
+	oauth2Config = &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scopes:       scopes,
+		Endpoint:     twitch.Endpoint,
+		RedirectURL:  redirectURL,
+	}
+
+	return c.Redirect(oauth2Config.AuthCodeURL(state), fiber.StatusTemporaryRedirect)
 }
 
-func LoginOrRegisterUser(c *fiber.Ctx) error {
+func UserLoginCallback(c *fiber.Ctx) error {
+	sessionStorage, err := cookieStore.Get(c)
+
+	if err != nil {
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, invalidSession, err.Error())
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)))
+	}
+
+	switch stateChallenge, state := sessionStorage.Get(stateCallbackKey), c.FormValue("state"); {
+
+	case state == "", stateChallenge == "":
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusBadRequest, "State is missing!", nil)
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusBadRequest)
+
+	case state != stateChallenge:
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusBadRequest, invalidState, nil)
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusBadRequest)
+
+	}
+
+	token, err := oauth2Config.Exchange(context.Background(), c.FormValue("code"))
+
+	if err != nil {
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, invalidSession, err.Error())
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
+	}
+
+	sessionStorage.Set(oauthTokenKey, token)
+
 	db := database.DB
-	var userBody *model.UserFind
 	var dataTwitch *model.DataTwitch
 	var user *model.User
 
-	err := c.BodyParser(&userBody)
+	err = getTwitchUserFromToken(&dataTwitch, token.AccessToken)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": constants.StatusBadRequest, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
-	}
-
-	userToken := userBody.TwitchToken
-
-	err = getTwitchUserFromToken(&dataTwitch, userToken)
-
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 	}
 
 	if dataTwitch != nil {
 		if dataTwitch.Data == nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": constants.StatusUnauthorized, "message": constants.GenericUnauthorizedMessage, "data": nil})
+			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusUnauthorized, constants.GenericUnauthorizedMessage, nil)
+			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusUnauthorized)
 		} else if dataTwitch.Data[0].ID == "" {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": constants.StatusNotFound, "message": model.MessageUser(constants.GenericNotFoundMessage), "data": nil})
+			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusNotFound, model.MessageUser(constants.GenericNotFoundMessage), nil)
+			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusNotFound)
 		}
 	}
 
 	err = db.Find(&user, constants.IdCondition, dataTwitch.Data[0].ID).Error
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 	}
 
 	if user.ID == 0 {
@@ -111,21 +156,14 @@ func LoginOrRegisterUser(c *fiber.Ctx) error {
 
 		err = db.Create(&user).Error
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 		}
 	}
 
-	err = userHandler.FetchUserAddresses(&user)
+	paramEncoded := url.QueryEscape(fmt.Sprintf("user_id=%d", user.ID))
+	return c.Redirect(fmt.Sprintf("%s?%s", baseSuccessUrl, paramEncoded), fiber.StatusPermanentRedirect)
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
-	}
-
-	validToken, err := jwt.GenerateToken(user.Login, user.DisplayName, user.Email, strconv.FormatInt(user.ID, 10))
-
-	data := fiber.Map{"user": user, "token": validToken}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": constants.StatusSuccess, "message": model.MessageUser(constants.GenericFoundSuccessMessage), "data": data})
 }
 
 func GetBroadcasterToken() (string, error) {
@@ -135,7 +173,7 @@ func GetBroadcasterToken() (string, error) {
 
 	if err == nil {
 		if err == ttlcache.ErrNotFound {
-			oauth2Config = &clientcredentials.Config{
+			oauth2ClientCredentials = &clientcredentials.Config{
 				ClientID:     clientID,
 				ClientSecret: clientSecret,
 				TokenURL:     twitch.Endpoint.TokenURL,
@@ -148,7 +186,7 @@ func GetBroadcasterToken() (string, error) {
 				return "", err
 			}
 
-			token, err := oauth2Config.Token(context.Background())
+			token, err := oauth2ClientCredentials.Token(context.Background())
 
 			if err != nil {
 				return "", err
@@ -169,6 +207,19 @@ func GetBroadcasterToken() (string, error) {
 
 	return broadcasterToken.(string), nil
 
+}
+
+func generateState() (string, error) {
+
+	var tokenBytes [255]byte
+
+	if _, err := rand.Read(tokenBytes[:]); err != nil {
+		return "", err
+	}
+
+	state := hex.EncodeToString(tokenBytes[:])
+
+	return state, nil
 }
 
 var myClient = &http.Client{Timeout: 30 * time.Second}

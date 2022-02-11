@@ -3,7 +3,6 @@ package userRoutes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/vinicarvalhosantos/fawkes-api/internal/handler/user"
-	authRoutes "github.com/vinicarvalhosantos/fawkes-api/internal/route/user/auth"
 	constantUtils "github.com/vinicarvalhosantos/fawkes-api/internal/util/constant"
 	"github.com/vinicarvalhosantos/fawkes-api/internal/util/jwt"
 )
@@ -18,7 +17,5 @@ func SetupUserRoutes(router fiber.Router) {
 	userRoute.Get(constantUtils.PathUserIdParam, jwt.Protected(), user.GetUserById)
 	//Update User
 	userRoute.Put(constantUtils.PathUserIdParam, jwt.Protected(), user.UpdateUser)
-
-	authRoutes.SetupAuthRoutes(userRoute)
 
 }
