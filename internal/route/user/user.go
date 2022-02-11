@@ -16,6 +16,8 @@ func SetupUserRoutes(router fiber.Router) {
 	userRoute.Get("/", jwt.Protected(), user.GetAllUsers)
 	//Get User By ID
 	userRoute.Get(constantUtils.PathUserIdParam, jwt.Protected(), user.GetUserById)
+	//Update User
+	userRoute.Put(constantUtils.PathUserIdParam, jwt.Protected(), user.UpdateUser)
 
 	authRoutes.SetupAuthRoutes(userRoute)
 
