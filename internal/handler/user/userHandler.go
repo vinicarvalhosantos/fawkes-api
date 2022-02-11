@@ -97,6 +97,12 @@ func UpdateUser(c *fiber.Ctx) error {
 
 	model.PrepareUserToUpdate(&user, updateUser)
 
+	err = db.Save(&user).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constantUtils.StatusInternalServerError, "message": constantUtils.GenericInternalServerErrorMessage, "data": err.Error()})
+	}
+
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{"status": constantUtils.StatusSuccess, "message": model.MessageUser(constantUtils.GenericUpdateSuccessMessage), "data": user})
 }
 
