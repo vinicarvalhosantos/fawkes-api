@@ -33,6 +33,7 @@ const (
 	PathUserIdParam           = "/:userId"
 	PathAddressIdParam        = "/:addressId"
 	PathUpdateUserMainAddress = "/:addressId/address/:userId/user"
+	PathRewardIdParam         = "/:rewardId"
 
 	//CONDITIONS
 

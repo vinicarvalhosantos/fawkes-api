@@ -15,7 +15,7 @@ type Reward struct {
 	IsEnabled       bool
 	ShouldSkipQueue bool
 	MaxUsePerStream int16
-	MaxUserPerUser  int16
+	MaxUsePerUser   int16
 	GlobalCooldown  int32
 	IsPaused        bool
 	CreatedBy       int64
@@ -26,12 +26,12 @@ type Reward struct {
 type UpdateReward struct {
 	Title           string
 	Prompt          string
-	Cost            uint
+	Cost            int16
 	BackgroundColor string
 	ShouldSkipQueue bool
 	MaxUsePerStream int16
 	MaxUsePerUser   int16
-	GlobalCooldowm  int32
+	GlobalCooldown  int32
 }
 
 func CheckIfRewardEntityIsValid(reward *Reward) (bool, string) {
@@ -53,8 +53,8 @@ func CheckIfRewardEntityIsValid(reward *Reward) (bool, string) {
 	if reward.MaxUsePerStream == 0 {
 		return false, "MaxUsePerStream"
 	}
-	if reward.MaxUserPerUser == 0 {
-		return false, "MaxUserPerUser"
+	if reward.MaxUsePerUser == 0 {
+		return false, "MaxUsePerUser"
 	}
 	if reward.GlobalCooldown == 0 {
 		return false, "GlobalCooldown"
@@ -65,33 +65,30 @@ func CheckIfRewardEntityIsValid(reward *Reward) (bool, string) {
 	return true, ""
 }
 
-/*func PrepareRewardToUpdate(reward **Reward, updateReward *UpdateReward) {
+func PrepareRewardToUpdate(reward **Reward, updateReward *UpdateReward) {
 
 	if updateReward.Title != "" {
-		(*reward).Title == updateReward.Title
+		(*reward).Title = updateReward.Title
 	}
 	if updateReward.Prompt != "" {
-		(*reward).Prompt == updateReward.Prompt
+		(*reward).Prompt = updateReward.Prompt
 	}
 	if updateReward.Cost != 0 {
-		(*reward).Cost == updateReward.Cost
+		(*reward).Cost = updateReward.Cost
 	}
 	if updateReward.BackgroundColor != "" {
-		(*reward).BackgroundColor == updateReward.BackgroundColor
-	}
-	if updateReward.ShouldSkipQueue != 0 {
-		(*reward).ShouldSkipQueue == updateReward.ShouldSkipQueue
+		(*reward).BackgroundColor = updateReward.BackgroundColor
 	}
 	if updateReward.MaxUsePerStream != 0 {
-		(*reward).MaxUsePerStream == updateReward.MaxUsePerStream
+		(*reward).MaxUsePerStream = updateReward.MaxUsePerStream
 	}
 	if updateReward.MaxUsePerUser != 0 {
-		(*reward).MaxUsePerUser == updateReward.MaxUsePerUser
+		(*reward).MaxUsePerUser = updateReward.MaxUsePerUser
 	}
-	if updateReward.GlobalCooldowm != 0 {
-		(*reward).GlobalCooldown == reward.GlobalCooldown
+	if updateReward.GlobalCooldown != 0 {
+		(*reward).GlobalCooldown = updateReward.GlobalCooldown
 	}
-}*/
+}
 
 func MessageReward(genericMessage string) string {
 	return stringUtil.FormatGenericMessagesString(genericMessage, "Reward")
