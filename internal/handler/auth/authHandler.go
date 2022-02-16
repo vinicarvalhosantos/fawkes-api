@@ -128,7 +128,7 @@ func UserLoginCallback(c *fiber.Ctx) error {
 
 	if dataTwitch != nil {
 		if dataTwitch.Data == nil {
-			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusUnauthorized, constants.GenericUnauthorizedMessage, nil)
+			urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusUnauthorized, constants.GenericUnauthorizedMessage, nil)
 			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusUnauthorized)
 		} else if dataTwitch.Data[0].ID == "" {
 			urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusNotFound, model.MessageUser(constants.GenericNotFoundMessage), nil)
@@ -226,9 +226,9 @@ var myClient = &http.Client{Timeout: 30 * time.Second}
 
 func getTwitchUserFromToken(target interface{}, userToken string) error {
 
-	url := fmt.Sprintf("%s/users", twitchHelixUrl)
+	helixUrlFormatted := fmt.Sprintf("%s/users", twitchHelixUrl)
 
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest("GET", helixUrlFormatted, nil)
 
 	if err != nil {
 		return err
