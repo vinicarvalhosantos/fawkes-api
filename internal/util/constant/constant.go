@@ -34,6 +34,10 @@ const (
 	PathAddressIdParam        = "/:addressId"
 	PathUpdateUserMainAddress = "/:addressId/address/:userId/user"
 	PathRewardIdParam         = "/:rewardId"
+	PathUpdateRewardDisable   = "/:rewardId/disable"
+	PathUpdateRewardEnable    = "/:rewardId/enable"
+	PathUpdateRewardPause     = "/:rewardId/pause"
+	PathUpdateRewardUnpause   = "/:rewardId/unpause"
 
 	//CONDITIONS
 

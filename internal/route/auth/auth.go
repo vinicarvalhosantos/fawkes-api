@@ -15,5 +15,4 @@ func SetupAuthRoutes(router fiber.Router) {
 	authRoute.Get("/", jwt.Protected(), auth.LoginOrRegisterTwitchUser)
 	//Twitch Callback
 	authRoute.Get("/user-callback", auth.UserLoginCallback)
-
 }

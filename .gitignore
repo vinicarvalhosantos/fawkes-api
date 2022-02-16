@@ -110,5 +110,5 @@ fabric.properties
 
 # Sonar scan project
 scan-project.*
-
+server
 # End of https://www.toptal.com/developers/gitignore/api/goland,go

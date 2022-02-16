@@ -28,6 +28,7 @@ func GetReward(c *fiber.Ctx) error {
 			"message": model.MessageReward(constants.GenericNotFoundMessage),
 			"data":    nil})
 	}
+
 	return c.JSON(fiber.Map{
 		"status":  constants.StatusSuccess,
 		"message": model.MessageReward(constants.GenericFoundSuccessMessage),
@@ -60,6 +61,7 @@ func GetRewardByID(c *fiber.Ctx) error {
 		"status": constants.StatusSuccess,
 		"model":  model.MessageReward(constants.GenericFoundSuccessMessage),
 		"data":   reward})
+
 }
 
 func RegisterReward(c *fiber.Ctx) error {
@@ -70,32 +72,50 @@ func RegisterReward(c *fiber.Ctx) error {
 	err := c.BodyParser(&reward)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": constants.GenericInternalServerErrorMessage,
+			"data":    err.Error()})
 	}
 
 	isValid, invalidField := model.CheckIfRewardEntityIsValid(reward)
 
 	if !isValid {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": constants.StatusBadRequest, "message": stringUtil.FormatGenericMessagesString(constants.GenericInvalidFieldMessage, invalidField), "data": nil})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  constants.StatusBadRequest,
+			"message": stringUtil.FormatGenericMessagesString(constants.GenericInvalidFieldMessage, invalidField),
+			"data":    nil})
 	}
 
 	err = db.Find(&searchReward, constants.IdCondition, reward.ID).Error
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": constants.GenericInternalServerErrorMessage,
+			"data":    err.Error()})
 	}
 
 	if searchReward.ID != uuid.Nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": constants.StatusBadRequest, "message": "This ID is already exists in our database", "data": nil})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  constants.StatusBadRequest,
+			"message": "This ID is already exists in our database",
+			"data":    nil})
 	}
 
 	err = db.Create(&reward).Error
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": constants.GenericInternalServerErrorMessage,
+			"data":    err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"status": constants.StatusSuccess, "message": model.MessageReward(constants.GenericCreateSuccessMessage), "data": reward})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  constants.StatusSuccess,
+		"message": model.MessageReward(constants.GenericCreateSuccessMessage),
+		"data":    reward})
 }
 
 func UpdateReward(c *fiber.Ctx) error {
@@ -130,6 +150,180 @@ func UpdateReward(c *fiber.Ctx) error {
 	}
 
 	model.PrepareRewardToUpdate(&reward, updateReward)
+	err = db.Save(reward).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  constants.StatusSuccess,
+		"message": model.MessageReward(constants.GenericFoundSuccessMessage),
+		"data":    reward})
+}
+
+func DisableReward(c *fiber.Ctx) error {
+	db := database.DB
+	var reward *model.Reward
+
+	id := c.Params("rewardId")
+
+	err := db.Find(&reward, constants.IdCondition, id).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.StatusInternalServerError),
+			"data":    err.Error()})
+	}
+
+	if reward.ID == uuid.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  constants.StatusNotFound,
+			"message": model.MessageReward(constants.GenericNotFoundMessage),
+			"data":    nil})
+	}
+
+	err = db.Model(&model.Reward{}).Where(constants.IdCondition, reward.ID).Update("is_enabled", false).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  constants.StatusSuccess,
+		"message": model.MessageReward(constants.GenericUpdateSuccessMessage),
+		"data":    reward})
+}
+
+func EnableReward(c *fiber.Ctx) error {
+	db := database.DB
+	var reward *model.Reward
+
+	id := c.Params("rewardId")
+
+	err := db.Find(&reward, constants.IdCondition, id).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	if reward.ID == uuid.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  constants.StatusNotFound,
+			"message": model.MessageReward(constants.GenericNotFoundMessage),
+			"data":    nil})
+	}
+
+	err = db.Model(&model.Reward{}).Where(constants.IdCondition, reward.ID).Update("is_enabled", false).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	reward.IsEnabled = true
+
+	err = db.Save(reward).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  constants.StatusSuccess,
+		"message": model.MessageReward(constants.GenericUpdateSuccessMessage),
+		"data":    reward})
+}
+
+func PauseReward(c *fiber.Ctx) error {
+	db := database.DB
+	var reward *model.Reward
+
+	id := c.Params("rewardId")
+
+	err := db.Find(&reward, constants.IdCondition, id).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericNotFoundMessage),
+			"data":    err.Error()})
+	}
+
+	if reward.ID == uuid.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  constants.StatusNotFound,
+			"message": model.MessageReward(constants.GenericNotFoundMessage),
+			"data":    nil})
+	}
+
+	err = db.Model(&model.Reward{}).Where(constants.IdCondition, reward.ID).Update("is_paused", true).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericNotFoundMessage),
+			"data":    err.Error()})
+	}
+
+	reward.IsPaused = false
+
+	err = db.Save(reward).Error
+
+	return c.JSON(fiber.Map{
+		"status":  constants.StatusSuccess,
+		"message": model.MessageReward(constants.GenericUpdateSuccessMessage),
+		"data":    reward})
+}
+
+func UnpauseReward(c *fiber.Ctx) error {
+	db := database.DB
+	var reward *model.Reward
+
+	id := c.Params("rewardId")
+
+	err := db.Find(&reward, constants.IdCondition, id).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	if reward.ID == uuid.Nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  constants.StatusNotFound,
+			"message": model.MessageReward(constants.StatusNotFound),
+			"data":    nil})
+	}
+
+	err = db.Model(&model.Reward{}).Where(constants.IdCondition, reward.ID).Update("is_paused", false).Error
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"status":  constants.StatusInternalServerError,
+			"message": model.MessageReward(constants.GenericInternalServerErrorMessage),
+			"data":    err.Error()})
+	}
+
+	reward.IsPaused = true
+
 	err = db.Save(reward).Error
 
 	if err != nil {
