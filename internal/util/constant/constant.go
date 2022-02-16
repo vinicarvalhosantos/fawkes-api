@@ -42,5 +42,5 @@ const (
 
 	//PARAMS
 
-	RedirectFrontErrorParams = "?status=%s&message=%s&data=%s"
+	RedirectFrontErrorParams = "?status=%s&message=%s&data=%#v"
 )
