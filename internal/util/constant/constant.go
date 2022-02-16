@@ -39,4 +39,8 @@ const (
 
 	IdCondition     = "id = ?"
 	UserIdCondition = "user_id = ?"
+
+	//PARAMS
+
+	RedirectFrontErrorParams = "?status=%s&message=%s&data=%s"
 )

@@ -40,7 +40,7 @@ var (
 	clientID                = config.GetSecretKey("TWITCH_CLIENT_ID")
 	clientSecret            = config.GetSecretKey("TWITCH_CLIENT_SECRET")
 	oauth2ClientCredentials *clientcredentials.Config
-	redirectURL             = config.GetSecretKey("TWITCH_REDIRECT_URL")
+	redirectURL             = config.GetSecretKey("TWITCH_LOGIN_REDIRECT_URL")
 	oauth2Config            *oauth2.Config
 	scopes                  = strings.Split(config.GetSecretKey("TWITCH_SCOPES"), ";")
 	twitchHelixUrl          = config.GetSecretKey("TWITCH_HELIX_URL")
@@ -90,18 +90,18 @@ func UserLoginCallback(c *fiber.Ctx) error {
 	sessionStorage, err := cookieStore.Get(c)
 
 	if err != nil {
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, invalidSession, err.Error())
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusInternalServerError, invalidSession, err.Error())
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)))
 	}
 
 	switch stateChallenge, state := sessionStorage.Get(stateCallbackKey), c.FormValue("state"); {
 
 	case state == "", stateChallenge == "":
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusBadRequest, "State is missing!", nil)
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusBadRequest, "State is missing!", nil)
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusBadRequest)
 
 	case state != stateChallenge:
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusBadRequest, invalidState, nil)
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusBadRequest, invalidState, nil)
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusBadRequest)
 
 	}
@@ -109,7 +109,7 @@ func UserLoginCallback(c *fiber.Ctx) error {
 	token, err := oauth2Config.Exchange(context.Background(), c.FormValue("code"))
 
 	if err != nil {
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, invalidSession, err.Error())
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusInternalServerError, invalidSession, err.Error())
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 	}
 
@@ -122,7 +122,7 @@ func UserLoginCallback(c *fiber.Ctx) error {
 	err = getTwitchUserFromToken(&dataTwitch, token.AccessToken)
 
 	if err != nil {
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 	}
 
@@ -131,7 +131,7 @@ func UserLoginCallback(c *fiber.Ctx) error {
 			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusUnauthorized, constants.GenericUnauthorizedMessage, nil)
 			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusUnauthorized)
 		} else if dataTwitch.Data[0].ID == "" {
-			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusNotFound, model.MessageUser(constants.GenericNotFoundMessage), nil)
+			urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusNotFound, model.MessageUser(constants.GenericNotFoundMessage), nil)
 			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusNotFound)
 		}
 	}
@@ -139,7 +139,7 @@ func UserLoginCallback(c *fiber.Ctx) error {
 	err = db.Find(&user, constants.IdCondition, dataTwitch.Data[0].ID).Error
 
 	if err != nil {
-		urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+		urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
 		return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 	}
 
@@ -156,13 +156,13 @@ func UserLoginCallback(c *fiber.Ctx) error {
 
 		err = db.Create(&user).Error
 		if err != nil {
-			urlParameters := fmt.Sprintf("?status=%s&message=%s&data=%s", constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
+			urlParameters := fmt.Sprintf(constants.RedirectFrontErrorParams, constants.StatusInternalServerError, constants.GenericInternalServerErrorMessage, err.Error())
 			return c.Redirect(fmt.Sprintf("%s%s", baseErrorUrl, url.QueryEscape(urlParameters)), fiber.StatusInternalServerError)
 		}
 	}
 
-	paramEncoded := url.QueryEscape(fmt.Sprintf("user_id=%d", user.ID))
-	return c.Redirect(fmt.Sprintf("%s?%s", baseSuccessUrl, paramEncoded), fiber.StatusPermanentRedirect)
+	paramEncoded := fmt.Sprintf("user_id=%d", user.ID)
+	return c.Redirect(fmt.Sprintf("%s?%s", baseSuccessUrl, url.QueryEscape(paramEncoded)), fiber.StatusPermanentRedirect)
 
 }
 
