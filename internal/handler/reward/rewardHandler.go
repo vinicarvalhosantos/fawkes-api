@@ -335,7 +335,7 @@ func UnpauseReward(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status":  constants.StatusSuccess,
-		"message": model.MessageReward(constants.GenericFoundSuccessMessage),
+		"message": model.MessageReward(constants.GenericUpdateSuccessMessage),
 		"data":    reward})
 }
 
