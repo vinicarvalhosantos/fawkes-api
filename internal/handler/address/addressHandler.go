@@ -147,7 +147,7 @@ func UpdateUserMainAddress(c *fiber.Ctx) error {
 
 	address.MainAddress = true
 
-	err = db.Save(address).Error
+	err = db.Save(&address).Error
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": constants.StatusInternalServerError, "message": constants.GenericInternalServerErrorMessage, "data": err.Error()})
